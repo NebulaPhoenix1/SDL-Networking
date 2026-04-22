@@ -1,0 +1,5 @@
+﻿  Shared.cpp
+  Game_Server.cpp
+C:\Code repos\SDL3_Networking\SDL3_Networking_Game_Server\Game_Server.cpp(43,35): warning C4804: '>': unsafe use of type 'bool' in operation
+  Generating Code...
+  SDL3_Networking_Game_Server.vcxproj -> C:\Code repos\SDL3_Networking\x64\Debug\SDL3_Networking_Game_Server.exe

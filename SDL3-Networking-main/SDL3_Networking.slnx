@@ -1,0 +1,11 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="SDL3_Networking/SDL3_Networking.vcxproj" Id="b2fb1b7b-e42e-4252-af0d-12769c3ba8e0" />
+  <Project Path="SDL3_Networking_BasicClient/SDL3_Networking_BasicClient.vcxproj" Id="eb8539f6-ccb3-427a-b6fb-19d2c9355531" />
+  <Project Path="SDL3_Networking_Game_Client/SDL3_Networking_Game_Client.vcxproj" Id="a8a33398-5bb5-4432-a317-3d3920e71acb" />
+  <Project Path="SDL3_Networking_Game_Server/SDL3_Networking_Game_Server.vcxproj" Id="c8e0c210-a6b7-4f52-ab70-735d7ebcd65f" />
+  <Project Path="SharedCode/SharedCode.vcxitems" Id="e96f28fc-85fb-47eb-a38b-86aa422edc59" />
+</Solution>

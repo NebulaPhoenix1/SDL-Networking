@@ -1,0 +1,5 @@
+﻿  Basic_Client.cpp
+E:\SDL3_Networking\SDL3_Networking_BasicClient\Basic_Client.cpp(11,17): warning C4804: '<': unsafe use of type 'bool' in operation
+E:\SDL3_Networking\SDL3_Networking_BasicClient\Basic_Client.cpp(16,17): warning C4804: '<': unsafe use of type 'bool' in operation
+E:\SDL3_Networking\SDL3_Networking_BasicClient\Basic_Client.cpp(46,35): warning C4804: '>': unsafe use of type 'bool' in operation
+  SDL3_Networking_BasicClient.vcxproj -> E:\SDL3_Networking\x64\Debug\SDL3_Networking_BasicClient.exe
