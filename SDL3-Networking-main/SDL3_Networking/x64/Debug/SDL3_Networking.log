@@ -1,6 +1,8 @@
-﻿C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Microsoft\VC\v180\Microsoft.CppBuild.targets(548,5): warning MSB8028: The intermediate directory (x64\Debug\) contains files shared from another project (SDL3_Networking.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+﻿C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Microsoft\VC\v180\Microsoft.CppBuild.targets(551,5): warning MSB8028: The intermediate directory (x64\Debug\) contains files shared from another project (SDL3_Networking.vcxproj).  This can lead to incorrect clean and rebuild behavior.
   Basic_Server.cpp
-E:\SDL3_Networking\SDL3_Networking\Basic_Server.cpp(11,17): warning C4804: '<': unsafe use of type 'bool' in operation
-E:\SDL3_Networking\SDL3_Networking\Basic_Server.cpp(16,17): warning C4804: '<': unsafe use of type 'bool' in operation
-E:\SDL3_Networking\SDL3_Networking\Basic_Server.cpp(39,10): warning C4101: 'buffer': unreferenced local variable
-  SDL3_Networking.vcxproj -> E:\SDL3_Networking\x64\Debug\SDL3_Networking_BasicServer.exe
+C:\Users\luker\Documents\GitHub\SDL-Networking\SDL3-Networking-main\SDL3_Networking\Basic_Server.cpp(11,17): warning C4804: '<': unsafe use of type 'bool' in operation
+C:\Users\luker\Documents\GitHub\SDL-Networking\SDL3-Networking-main\SDL3_Networking\Basic_Server.cpp(16,17): warning C4804: '<': unsafe use of type 'bool' in operation
+C:\Users\luker\Documents\GitHub\SDL-Networking\SDL3-Networking-main\SDL3_Networking\Basic_Server.cpp(39,10): warning C4101: 'buffer': unreferenced local variable
+  SDL3_Networking.vcxproj -> C:\Users\luker\Documents\GitHub\SDL-Networking\SDL3-Networking-main\x64\Debug\SDL3_Networking_BasicServer.exe
+  'pwsh.exe' is not recognized as an internal or external command,
+  operable program or batch file.

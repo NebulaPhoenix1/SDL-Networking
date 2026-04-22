@@ -30,3 +30,4 @@
 *.exe
 *.out
 *.app
+/SDL3-Networking-main/.vs

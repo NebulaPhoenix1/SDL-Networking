@@ -6,7 +6,8 @@ enum PacketType{
     PACKET_JOIN,
     PACKET_INPUT,
     PACKET_STATE,
-    PACKET_ASSIGN_ID
+    PACKET_ASSIGN_ID,
+    PACKET_DISCONNECT
 };
 
 struct PlayerState {
@@ -27,6 +28,11 @@ struct StatePacket {
 };
 
 struct AssignIdPacket {
+    PacketType type;
+    int id;
+};
+
+struct DisconnectPacket {
     PacketType type;
     int id;
 };

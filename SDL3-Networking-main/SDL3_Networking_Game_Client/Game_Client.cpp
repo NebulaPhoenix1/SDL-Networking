@@ -3,7 +3,7 @@
 #include <iostream>
 #include <cstring>
 #include <vector>
-#include "Shared.h"
+#include "../SharedCode/Shared.h"
 
 struct Client {
     int id;
@@ -59,7 +59,7 @@ int main(int argc, char** argv) {
         sizeof(join)
     );
 
-    int myId = -1;
+    int myID = -1;
 
 
     bool running = true;
@@ -70,7 +70,26 @@ int main(int argc, char** argv) {
         SDL_Event e;
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_EVENT_QUIT)
+            {
                 running = false;
+				//Only disconnect if we actually have an ID assigned (joined the game)
+                if (myID != -1)
+                {
+                    //Create disconnect packet
+                    DisconnectPacket disconnect;
+					disconnect.type = PACKET_DISCONNECT;
+					disconnect.id = myID;
+                    //Send to server
+                    NET_SendDatagram(
+                        socket,
+                        serverAddr,
+                        serverPort,
+                        &disconnect,
+                        sizeof(disconnect)
+                    );
+                }
+            }
+                
         }
 
         float dx = 0, dy = 0;
@@ -83,9 +102,9 @@ int main(int argc, char** argv) {
         if (keys[SDL_SCANCODE_A]) dx = -2;
         if (keys[SDL_SCANCODE_D]) dx = 2;
 
-        if (myId != -1)
+        if (myID != -1)
         {
-            InputPacket input = { PACKET_INPUT,myId, dx, dy };
+            InputPacket input = { PACKET_INPUT,myID, dx, dy };
 
             NET_SendDatagram(
                 socket,
@@ -127,11 +146,26 @@ int main(int argc, char** argv) {
 
                 AssignIdPacket* msg = (AssignIdPacket*)dgram->buf;
 
-                myId = msg->id;
+                myID = msg->id;
 
-                std::cout << "Got ID: " << myId << "\n";
+                std::cout << "Got ID: " << myID << "\n";
             }
 
+			if (type == PACKET_DISCONNECT)
+            {
+                DisconnectPacket* dc = (DisconnectPacket*)dgram->buf;
+                int disconnectedID = dc->id; //ID of the player that left
+                //Loop through clients and remove the one that left
+				for (auto it = Clients.begin(); it != Clients.end(); ++it)
+                {
+                    if(it->id == disconnectedID)
+                    {
+						std::cout << "Client disconnected: " << disconnectedID << "\n";
+                        Clients.erase(it);
+                        break;
+                    }
+                }
+            }
 
             NET_DestroyDatagram(dgram);
             dgram = nullptr;

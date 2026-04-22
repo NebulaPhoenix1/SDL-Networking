@@ -12,7 +12,7 @@ int main(int argc, char* argv[])
         std::cout << "SDL init failed: " << SDL_GetError() << "\n";
         return 1;
     }
-    
+
     if (NET_Init() < 0) {
 		std::cout << "NET init failed: %s\n"<<SDL_GetError() << std::endl;
         return 1;
@@ -36,11 +36,10 @@ int main(int argc, char* argv[])
     std::cout << "Socket created on port 1234"<< "\n";
 
     bool running = true;
+    SDL_Event event;
 
     while (running) {
-        
         // RECEIVE
-
         NET_Datagram* dgram = nullptr;
 
         while (NET_ReceiveDatagram(socket, &dgram) > 0 && dgram) {
@@ -51,14 +50,16 @@ int main(int argc, char* argv[])
             dgram = nullptr;
         }
 
-        SDL_Delay(1000);
+        SDL_Delay(16); //~60FPS
     }
 
+    //Send disconnect packet to server
+
+    //Destroy everything in reverese order
     NET_UnrefAddress(IPaddress);
     NET_DestroyDatagramSocket(socket);
-
     NET_Quit();
+	
     SDL_Quit();
-
     return 0;
 }

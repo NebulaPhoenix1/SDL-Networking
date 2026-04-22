@@ -3,7 +3,7 @@
 #include <vector>
 #include <iostream>
 #include <cstring>
-#include "shared.h"
+#include "../SharedCode/Shared.h"
 
 struct Client {
     NET_Address* addr;
@@ -80,6 +80,34 @@ int main(int argc, char** argv) {
                         c.y += input->dy;
                         break;
                     }
+                }
+            }
+
+			else if (type == PACKET_DISCONNECT)
+            {
+				DisconnectPacket* dc = (DisconnectPacket*)dgram->buf;
+                int disconnectedID = dc->id; //ID of the player that left
+                //Loop through clients and remove the one that left
+				for (auto it = clients.begin(); it != clients.end(); ++it)
+                {
+                    if(it->id == disconnectedID)
+                    {
+                        SDL_Log("Client disconnected: %d", it->id);
+						NET_UnrefAddress(it->addr); ///Clean up address reference
+                        clients.erase(it); //Remove client from list
+                        break;
+                    }
+                }
+				//Send disconnect message to all clients so they can remove the player that left
+                for (auto& receiver : clients)
+                {
+                    NET_SendDatagram(
+                        socket,
+                        receiver.addr,
+                        receiver.port,
+                        dc, //Send the same disconnect packet to all clients so they know who left
+                        sizeof(*dc)
+                    );
                 }
             }
 

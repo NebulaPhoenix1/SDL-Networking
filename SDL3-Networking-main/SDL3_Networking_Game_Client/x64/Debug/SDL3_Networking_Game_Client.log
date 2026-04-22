@@ -1,1 +1,7 @@
-﻿  SDL3_Networking_Game_Client.vcxproj -> C:\Code repos\SDL3_Networking\x64\Debug\SDL3_Networking_Game_Client.exe
+﻿  Game_Client.cpp
+C:\Users\luker\Documents\GitHub\SDL-Networking\SDL3-Networking-main\SDL3_Networking_Game_Client\Game_Client.cpp(14,17): warning C4804: '<': unsafe use of type 'bool' in operation
+C:\Users\luker\Documents\GitHub\SDL-Networking\SDL3-Networking-main\SDL3_Networking_Game_Client\Game_Client.cpp(24,17): warning C4804: '<': unsafe use of type 'bool' in operation
+C:\Users\luker\Documents\GitHub\SDL-Networking\SDL3-Networking-main\SDL3_Networking_Game_Client\Game_Client.cpp(123,35): warning C4804: '>': unsafe use of type 'bool' in operation
+  SDL3_Networking_Game_Client.vcxproj -> C:\Users\luker\Documents\GitHub\SDL-Networking\SDL3-Networking-main\x64\Debug\SDL3_Networking_Game_Client.exe
+  'pwsh.exe' is not recognized as an internal or external command,
+  operable program or batch file.
