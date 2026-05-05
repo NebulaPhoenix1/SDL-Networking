@@ -1,5 +1,14 @@
 #include <SDL3/SDL.h>
-#include <SDL3/SDL_net.h>
+#include <SDL3/SDL.h>
+
+// Check if we are compiling on a Mac
+#ifdef __APPLE__
+    #include <SDL3_net/SDL_net.h>
+// Otherwise (Windows/Linux), use the standard path
+#else
+    #include <SDL3/SDL_net.h>
+#endif
+
 #include <iostream>
 #include <cstring>
 #include <vector>
