@@ -5,142 +5,151 @@
 #include <cstring>
 #include "../SharedCode/Shared.h"
 
+//Using UDP for gameplay, TCP for joining and disconnecting
+
 struct Client {
-    NET_Address* addr;
-    Uint16 port;
     int id;
+    NET_StreamSocket* tcpSocket;
+    NET_Address* udpAddress;
+    Uint16 udpPort;
     float x, y;
 };
 
+struct ThreadData
+{
+    int clientID;
+    NET_StreamSocket* socket;
+    std::vector<Client>* clientsList;
+    SDL_Mutex* mutex;
+};
+
+int ClientThread(void* data)
+{
+	ThreadData* threadData = (ThreadData*)data;
+    char buffer[16];
+    while (true)
+    {
+		bool ready = NET_WaitUntilInputAvailable((void**)&threadData->socket, 1, 5000);
+        if(!ready)
+        {
+            continue;
+        }
+		int length = NET_ReadFromStreamSocket(threadData->socket, buffer, sizeof(buffer));
+        if (length <= 0) //Disconnect detected
+        {
+			SDL_Log("Client %d disconnected", threadData->clientID);
+			SDL_LockMutex(threadData->mutex);
+			for (auto it = threadData->clientsList->begin(); it != threadData->clientsList->end(); ++it)
+            {
+                if(it->id == threadData->clientID)
+                {
+                    if(it->udpAddress)
+                    {
+                        NET_UnrefAddress(it->udpAddress);
+					}
+                    NET_DestroyStreamSocket(it->tcpSocket);
+                    threadData->clientsList->erase(it);
+                    break;
+                }
+            }
+            SDL_UnlockMutex(threadData->mutex);
+            break;
+        }
+    }
+    delete threadData;
+	return 0;
+}
+
 bool sameClient(Client& c, NET_Address* addr, Uint16 port) {
-    bool adder = NET_CompareAddresses(c.addr, addr);
-    bool _port = c.port == port;
+    bool adder = NET_CompareAddresses(c.udpAddress, addr);
+    bool _port = c.udpPort == port;
         return adder && _port;
 }
 
 int main(int argc, char** argv) {
+    //Init SDL
     SDL_Init(0);
     NET_Init();
 
-    NET_DatagramSocket* socket = NET_CreateDatagramSocket(NULL, 1234);
-    if (!socket) {
-        SDL_Log("Socket failed: %s", SDL_GetError());
-        return 1;
-    }
+	//Setup UDP Socket and TCP Server
+	NET_DatagramSocket* udpSocket = NET_CreateDatagramSocket(NULL, 1234);
+    NET_Address* ip = NET_ResolveHostname("127.0.0.1");
+    NET_WaitUntilResolved(ip, 2000);
+	NET_Server* tcpServer = NET_CreateServer(ip, 1235);
 
     std::vector<Client> clients;
-    int nextId = 1;
-
-    
-    SDL_Log("Server started");
+    int nextID = 1;
+    SDL_Mutex* clientMutex = SDL_CreateMutex();
 
     while (true) {
+		//Accepting new TCP connections
+        NET_StreamSocket* newTcpSocket;
+        if (NET_AcceptClient(tcpServer, &newTcpSocket) && newTcpSocket)
+        {
+            int newID = nextID++;
+			NET_WriteToStreamSocket(newTcpSocket, &newID, sizeof(newID));
+            SDL_LockMutex(clientMutex);
+			clients.push_back({ newID, newTcpSocket, nullptr, 0, 100.0f, 100.0f });
 
-        //int len = NET_ReceiveDatagram(socket, &fromAddr, &fromPort, buffer, sizeof(buffer));
-        NET_Datagram* dgram = nullptr;
-        //int len = NET_ReceiveDatagram(socket, &dgram);
+			ThreadData* threadData = new ThreadData{ newID, newTcpSocket, &clients, clientMutex };
+			SDL_CreateThread(ClientThread, "ClientThread", threadData);
+            SDL_UnlockMutex(clientMutex);
 
-        while (NET_ReceiveDatagram(socket, &dgram) > 0 && dgram) {
-
-            PacketType type = *(PacketType*)dgram->buf;
-
-            if (type == PACKET_JOIN) {
-                Client c;
-                c.addr = NET_RefAddress(dgram->addr);
-                c.port = dgram->port;
-                c.id = nextId++;
-                c.x = 100;
-                c.y = 100;
-
-                clients.push_back(c);
-
-                SDL_Log("Client joined: %d", c.id);
-
-                // 👉 SEND ID BACK TO CLIENT
-                AssignIdPacket msg;
-                msg.type = PACKET_ASSIGN_ID;
-                msg.id = c.id;
-
-                NET_SendDatagram(
-                    socket,
-                    c.addr,
-                    c.port,
-                    &msg,
-                    sizeof(msg)
-                );
-
-                SDL_Log("Assigned ID %d", c.id);
-            }
-            else if (type == PACKET_INPUT) {
-                InputPacket* input = (InputPacket*)dgram->buf;
-
-                for (auto& c : clients) {
-                    if (c.id == input->id) {
-                        c.x += input->dx;
-                        c.y += input->dy;
-                        break;
-                    }
-                }
-            }
-
-			else if (type == PACKET_DISCONNECT)
+			SDL_Log("Client %d connected", newID);
+        }
+        //Read UDP packets
+		NET_Datagram* dgram = nullptr;
+        while (NET_ReceiveDatagram(udpSocket, &dgram) > 0 && dgram)
+        {
+			PacketType type = *(PacketType*)dgram->buf;
+            if (type == PACKET_INPUT)
             {
-				DisconnectPacket* dc = (DisconnectPacket*)dgram->buf;
-                int disconnectedID = dc->id; //ID of the player that left
-                //Loop through clients and remove the one that left
-				for (auto it = clients.begin(); it != clients.end(); ++it)
+                InputPacket* input = (InputPacket*)dgram->buf;
+                SDL_LockMutex(clientMutex);
+                for (Client& c : clients)
                 {
-                    if(it->id == disconnectedID)
+					if (c.id == input->id)
                     {
-                        SDL_Log("Client disconnected: %d", it->id);
-						NET_UnrefAddress(it->addr); ///Clean up address reference
-                        clients.erase(it); //Remove client from list
+                        if(!c.udpAddress)
+                        {
+							c.udpAddress = NET_RefAddress(dgram->addr);
+							c.udpPort = dgram->port;
+                        }
+						c.x += input->dx;
+						c.y += input->dy;
                         break;
                     }
                 }
-				//Send disconnect message to all clients so they can remove the player that left
-                for (auto& receiver : clients)
-                {
-                    NET_SendDatagram(
-                        socket,
-                        receiver.addr,
-                        receiver.port,
-                        dc, //Send the same disconnect packet to all clients so they know who left
-                        sizeof(*dc)
-                    );
-                }
+                SDL_UnlockMutex(clientMutex);
+                dgram = nullptr;
             }
-
-            NET_DestroyDatagram(dgram);
-            dgram = nullptr;
-
         }
-
-        // Broadcast all player states
-        for (auto& receiver : clients) {
-            for (auto& sender : clients) {
-                StatePacket state;
-                state.type = PACKET_STATE;
-                state.id = sender.id;
-                state.x = sender.x;
-                state.y = sender.y;
-
-                NET_SendDatagram(socket,
-                    receiver.addr,
-                    receiver.port,
+        //Broadcast UDP States
+		SDL_LockMutex(clientMutex);
+        for (auto& reciever : clients)
+        {
+            if (!reciever.udpAddress) continue;
+            for(auto& sender : clients)
+            {
+				StatePacket state = { PACKET_STATE, sender.id, sender.x, sender.y };
+                NET_SendDatagram(
+                    udpSocket,
+                    reciever.udpAddress,
+                    reciever.udpPort,
                     &state,
-                    sizeof(state));
+                    sizeof(state)
+				);
             }
         }
-
-        SDL_Delay(16);
+        SDL_UnlockMutex(clientMutex);
+        NET_DestroyDatagram(dgram);
+        dgram = nullptr;
+		SDL_Delay(16); // ~60 FPS
     }
-
-    // cleanup (never reached here in this loop)
-    for (auto& c : clients)
-        NET_UnrefAddress(c.addr);
-
-    NET_DestroyDatagramSocket(socket);
+    //Cleanup
+	SDL_DestroyMutex(clientMutex);
+    NET_DestroyServer(tcpServer);
+	NET_DestroyDatagramSocket(udpSocket);
     NET_Quit();
     SDL_Quit();
 }

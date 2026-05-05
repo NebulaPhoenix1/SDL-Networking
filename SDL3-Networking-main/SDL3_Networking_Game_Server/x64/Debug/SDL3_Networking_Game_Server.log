@@ -1,7 +1,5 @@
-﻿  Shared.cpp
-  Game_Server.cpp
-C:\Users\luker\Documents\GitHub\SDL-Networking\SDL3-Networking-main\SDL3_Networking_Game_Server\Game_Server.cpp(43,35): warning C4804: '>': unsafe use of type 'bool' in operation
-  Generating Code...
+﻿  Game_Server.cpp
+C:\Users\luker\Documents\GitHub\SDL-Networking\SDL3-Networking-main\SDL3_Networking_Game_Server\Game_Server.cpp(102,35): warning C4804: '>': unsafe use of type 'bool' in operation
   SDL3_Networking_Game_Server.vcxproj -> C:\Users\luker\Documents\GitHub\SDL-Networking\SDL3-Networking-main\x64\Debug\SDL3_Networking_Game_Server.exe
   'pwsh.exe' is not recognized as an internal or external command,
   operable program or batch file.
