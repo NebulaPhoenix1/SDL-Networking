@@ -1,10 +1,11 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL.h>
+#include <cmath>
 
-// Check if we are compiling on a Mac
+//Check if we are compiling on a Mac
 #ifdef __APPLE__
     #include <SDL3_net/SDL_net.h>
-// Otherwise (Windows/Linux), use the standard path
+//Otherwise (Windows/Linux), use the standard path
 #else
     #include <SDL3/SDL_net.h>
 #endif
@@ -18,17 +19,20 @@ struct Client {
     int id;
     float x, y;
     Uint64 lastSeenTime;
+    float angle;
 };
 
 const Uint64 DisconnectTimeoutMS = 5000; // 5 seconds
 
 int main(int argc, char** argv) {
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+    if (!SDL_Init(SDL_INIT_VIDEO))
+    {
         std::cout << "SDL init failed: " << SDL_GetError() << "\n";
         return 1;
     }
 
-    if (NET_Init() < 0) {
+    if (!NET_Init()) 
+    {
         std::cout << "SDLNet init failed: " << SDL_GetError() << "\n";
         return 1;
     }
@@ -71,15 +75,36 @@ int main(int argc, char** argv) {
         }
         //Send UDP Input
         float dx = 0, dy = 0;
-		const bool* keys = SDL_GetKeyboardState(NULL);
-		if (keys[SDL_SCANCODE_W]) dy = -1;
-        if (keys[SDL_SCANCODE_S]) dy = 1;
-		if (keys[SDL_SCANCODE_A]) dx = -1;
-        if (keys[SDL_SCANCODE_D]) dx = 1;
+        float angle = 0.0f;
+		//If id isnt -1, we are connected and lets find our current pos
         if(myID != -1)
-        { 
-			InputPacket input = { PACKET_INPUT, myID, dx, dy };
-			NET_SendDatagram(udpSocket, serverAddress, udpServerPort, &input, sizeof(input));
+        {
+            float myX = 0, myY = 0;
+            //Iterate through all clients positions to find ours
+            for(const Client& c : clients)
+            {
+                if(c.id == myID)
+                {
+                    myX = c.x;
+                    myY = c.y;
+                    break;
+                }
+            }
+            float mouseX, mouseY;
+            SDL_GetMouseState(&mouseX, &mouseY);
+            //Calculate direction vector to mouse
+            float dXMouse = mouseX - myX;
+            float dYMouse = mouseY - myY;
+            angle = std::atan2(dYMouse, dXMouse);
+            float distance = std::sqrt(dXMouse * dXMouse + dYMouse * dYMouse);
+            //Move towards mouse if we are further than a small deadzone
+            if(distance > 5.0f)
+            {
+                dx = dXMouse /distance;
+                dy = dYMouse /distance;
+            }
+            InputPacket input = { PACKET_INPUT, myID, dx, dy, angle };
+            NET_SendDatagram(udpSocket, serverAddress, udpServerPort, &input, sizeof(input));
         }
         //Receive UDP States
 		NET_Datagram* dgram = nullptr;
@@ -98,6 +123,7 @@ int main(int argc, char** argv) {
                         c.x = state->x;
                         c.y = state->y;
                         c.lastSeenTime = currentTime;
+                        c.angle = state->angle;
                         found = true;
                         break;
                     }
@@ -105,7 +131,7 @@ int main(int argc, char** argv) {
                 //New player, add to clients list
                 if (!found)
                 {
-					clients.push_back({ state->id, state->x, state->y, currentTime });
+					clients.push_back({ state->id, state->x, state->y, currentTime, state->angle });
                 }
             }
 			NET_DestroyDatagram(dgram);
@@ -128,10 +154,35 @@ int main(int argc, char** argv) {
 		SDL_RenderClear(renderer);
         for (Client& c : clients)
         {
-			SDL_FRect rect = { c.x, c.y, 20, 20 };
-            if(c.id == myID) SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); // Green for self
-			else SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // Red for others
-			SDL_RenderFillRect(renderer, &rect);
+			SDL_FColor fcolor = (c.id == myID) ? SDL_FColor{0, 1.0f, 0, 1.0f} : SDL_FColor{1.0f, 0, 0, 1.0f};
+
+            //Calculate triangle vertices based on angle
+            float size = 15.0f;
+            float tipX = c.x + std::cos(c.angle) * size;
+            float tipY = c.y + std::sin(c.angle) * size;
+            //135 deg approx equal to 2.356rad to create offset for wide back of triangle
+            float blX = c.x + std::cos(c.angle + 2.356f) * size;
+            float blY = c.y + std::sin(c.angle + 2.356f) * size;
+            float brX = c.x + std::cos(c.angle - 2.356f) * size;
+            float brY = c.y + std::sin(c.angle - 2.356f) * size;
+
+            SDL_Vertex vertices[3];
+            
+            vertices[0].position = {tipX, tipY};
+            vertices[0].color = fcolor;
+            vertices[0].tex_coord = {0.0f, 0.0f};
+
+            vertices[1].position = {blX, blY};
+            vertices[1].color = fcolor;
+            vertices[1].tex_coord = {0.0f, 0.0f};
+
+            vertices[2].position = {brX, brY};
+            vertices[2].color = fcolor;
+            vertices[2].tex_coord = {0.0f, 0.0f};
+            SDL_RenderGeometry(renderer, NULL, vertices, 3, NULL, 0);
+
+
+			//SDL_RenderFillRect(renderer, &rect);
         }
 		SDL_RenderPresent(renderer);
 		SDL_Delay(16); // ~60 FPS

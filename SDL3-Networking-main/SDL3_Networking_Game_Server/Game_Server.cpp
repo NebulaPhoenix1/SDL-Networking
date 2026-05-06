@@ -1,10 +1,10 @@
 ﻿#include <SDL3/SDL.h>
 #include <SDL3/SDL.h>
 
-// Check if we are compiling on a Mac
+//Check if we are compiling on a Mac
 #ifdef __APPLE__
     #include <SDL3_net/SDL_net.h>
-// Otherwise (Windows/Linux), use the standard path
+//Otherwise (Windows/Linux), use the standard path
 #else
     #include <SDL3/SDL_net.h>
 #endif
@@ -21,6 +21,7 @@ struct Client {
     NET_Address* udpAddress;
     Uint16 udpPort;
     float x, y;
+    float angle;
 };
 
 struct ThreadData
@@ -97,7 +98,8 @@ int main(int argc, char** argv) {
             int newID = nextID++;
 			NET_WriteToStreamSocket(newTcpSocket, &newID, sizeof(newID));
             SDL_LockMutex(clientMutex);
-			clients.push_back({ newID, newTcpSocket, nullptr, 0, 100.0f, 100.0f });
+            //Initalise with x,y and angle of 0
+			clients.push_back({ newID, newTcpSocket, nullptr, 0, 100.0f, 100.0f, 0 });
 
 			ThreadData* threadData = new ThreadData{ newID, newTcpSocket, &clients, clientMutex };
 			SDL_CreateThread(ClientThread, "ClientThread", threadData);
@@ -125,6 +127,7 @@ int main(int argc, char** argv) {
                         }
 						c.x += input->dx;
 						c.y += input->dy;
+                        c.angle = input->angle;
                         break;
                     }
                 }
@@ -139,7 +142,7 @@ int main(int argc, char** argv) {
             if (!reciever.udpAddress) continue;
             for(auto& sender : clients)
             {
-				StatePacket state = { PACKET_STATE, sender.id, sender.x, sender.y };
+				StatePacket state = { PACKET_STATE, sender.id, sender.x, sender.y, sender.angle };
                 NET_SendDatagram(
                     udpSocket,
                     reciever.udpAddress,
