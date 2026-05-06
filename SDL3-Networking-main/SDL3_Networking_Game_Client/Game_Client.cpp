@@ -154,6 +154,7 @@ int main(int argc, char** argv) {
 		SDL_RenderClear(renderer);
         for (Client& c : clients)
         {
+            //Using float colors as SDL3 was causing a hissy fit 
 			SDL_FColor fcolor = (c.id == myID) ? SDL_FColor{0, 1.0f, 0, 1.0f} : SDL_FColor{1.0f, 0, 0, 1.0f};
 
             //Calculate triangle vertices based on angle
@@ -165,7 +166,8 @@ int main(int argc, char** argv) {
             float blY = c.y + std::sin(c.angle + 2.356f) * size;
             float brX = c.x + std::cos(c.angle - 2.356f) * size;
             float brY = c.y + std::sin(c.angle - 2.356f) * size;
-
+            
+            //Defining the triangle for the current player we are rendering
             SDL_Vertex vertices[3];
             
             vertices[0].position = {tipX, tipY};
@@ -180,9 +182,6 @@ int main(int argc, char** argv) {
             vertices[2].color = fcolor;
             vertices[2].tex_coord = {0.0f, 0.0f};
             SDL_RenderGeometry(renderer, NULL, vertices, 3, NULL, 0);
-
-
-			//SDL_RenderFillRect(renderer, &rect);
         }
 		SDL_RenderPresent(renderer);
 		SDL_Delay(16); // ~60 FPS
