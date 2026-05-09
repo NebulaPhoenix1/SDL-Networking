@@ -22,6 +22,16 @@ struct Client {
     Uint16 udpPort;
     float x, y;
     float angle;
+    int health;
+    Uint64 lastShotTime;
+};
+
+struct Bullet
+{
+    float x, y;
+    float dx, dy;
+    int ownerID;
+    Uint64 spawnTime;
 };
 
 struct ThreadData
@@ -90,7 +100,15 @@ int main(int argc, char** argv) {
     int nextID = 1;
     SDL_Mutex* clientMutex = SDL_CreateMutex();
 
+    //Bullet inits
+    std::vector<Bullet> bullets;
+    const Uint64 shootCooldownMS = 300;
+    const float bulletSpeed = 10.0f;
+
     while (true) {
+
+        Uint64 currentTime = SDL_GetTicks();
+
 		//Accepting new TCP connections
         NET_StreamSocket* newTcpSocket;
         if (NET_AcceptClient(tcpServer, &newTcpSocket) && newTcpSocket)
@@ -99,7 +117,7 @@ int main(int argc, char** argv) {
 			NET_WriteToStreamSocket(newTcpSocket, &newID, sizeof(newID));
             SDL_LockMutex(clientMutex);
             //Initalise with x,y and angle of 0
-			clients.push_back({ newID, newTcpSocket, nullptr, 0, 100.0f, 100.0f, 0 });
+			clients.push_back({ newID, newTcpSocket, nullptr, 0, 100.0f, 100.0f, 0, 3, 0});
 
 			ThreadData* threadData = new ThreadData{ newID, newTcpSocket, &clients, clientMutex };
 			SDL_CreateThread(ClientThread, "ClientThread", threadData);
@@ -128,21 +146,63 @@ int main(int argc, char** argv) {
 						c.x += input->dx;
 						c.y += input->dy;
                         c.angle = input->angle;
+
+                        //Shooting check 
+                        if(input->shooting && currentTime - c.lastShotTime > shootCooldownMS)
+                        {
+                            c.lastShotTime = currentTime;
+                            //Spawn bullet at player facing the same direction they are
+                            float bdX = std::cos(c.angle) * bulletSpeed;
+                            float bdY = std::sin(c.angle) * bulletSpeed;
+                            bullets.push_back({ c.x, c.y, bdX, bdY, c.id, currentTime });
+
+                        }
                         break;
                     }
                 }
                 SDL_UnlockMutex(clientMutex);
+                NET_DestroyDatagram(dgram);
                 dgram = nullptr;
             }
         }
         //Broadcast UDP States
 		SDL_LockMutex(clientMutex);
+        //Bullets movement and collision checks
+        for (auto b = bullets.begin(); b != bullets.end();)
+        {
+            b->x += b->dx;
+            b->y += b->dy;
+            bool destroyed = false;
+            //Destroy bullets after 2s to ensure we dont flood RAM
+            if(currentTime - b->spawnTime > 2000) destroyed = true;
+            //Collision check
+            if (!destroyed)
+            {
+                for(auto& client: clients)
+                {
+                    //Skip if player is dead or the bullet owner
+                    if(client.id == b->ownerID || client.health <= 0) continue;
+                    //Pythagoras for collision check
+                    float distance = std::sqrt((client.x - b->x) * (client.x - b->x) + (client.y - b->y) * (client.y - b->y));
+                    if(distance < 15.0f) //15 is player size
+                    {
+                        client.health -= 1;
+                        destroyed = true;
+                        break;
+                    }
+                }   
+            }
+            if(destroyed) b = bullets.erase(b);
+            else ++b;
+        }
+        
+
         for (auto& reciever : clients)
         {
             if (!reciever.udpAddress) continue;
             for(auto& sender : clients)
             {
-				StatePacket state = { PACKET_STATE, sender.id, sender.x, sender.y, sender.angle };
+				StatePacket state = { PACKET_STATE, sender.id, sender.x, sender.y, sender.angle, sender.health};
                 NET_SendDatagram(
                     udpSocket,
                     reciever.udpAddress,
@@ -151,6 +211,14 @@ int main(int argc, char** argv) {
                     sizeof(state)
 				);
             }
+            //Send bullet packet data
+            BulletPacket bp = {PACKET_BULLETS, 0};
+            for(const auto& b: bullets)
+            {
+                if(bp.count >= 64) break; //Don't exceed packet limit
+                bp.bullets[bp.count++] = {b.x, b.y};
+            }
+            NET_SendDatagram(udpSocket, reciever.udpAddress, reciever.udpPort, &bp, sizeof(bp));
         }
         SDL_UnlockMutex(clientMutex);
         NET_DestroyDatagram(dgram);

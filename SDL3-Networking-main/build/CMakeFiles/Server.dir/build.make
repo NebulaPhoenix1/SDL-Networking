@@ -76,15 +76,15 @@ CMakeFiles/Server.dir/SDL3_Networking_Game_Server/Game_Server.cpp.o: CMakeFiles/
 CMakeFiles/Server.dir/SDL3_Networking_Game_Server/Game_Server.cpp.o: /Users/luke/Documents/GitHub/SDL-Networking/SDL3-Networking-main/SDL3_Networking_Game_Server/Game_Server.cpp
 CMakeFiles/Server.dir/SDL3_Networking_Game_Server/Game_Server.cpp.o: CMakeFiles/Server.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/luke/Documents/GitHub/SDL-Networking/SDL3-Networking-main/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/Server.dir/SDL3_Networking_Game_Server/Game_Server.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Server.dir/SDL3_Networking_Game_Server/Game_Server.cpp.o -MF CMakeFiles/Server.dir/SDL3_Networking_Game_Server/Game_Server.cpp.o.d -o CMakeFiles/Server.dir/SDL3_Networking_Game_Server/Game_Server.cpp.o -c /Users/luke/Documents/GitHub/SDL-Networking/SDL3-Networking-main/SDL3_Networking_Game_Server/Game_Server.cpp
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Server.dir/SDL3_Networking_Game_Server/Game_Server.cpp.o -MF CMakeFiles/Server.dir/SDL3_Networking_Game_Server/Game_Server.cpp.o.d -o CMakeFiles/Server.dir/SDL3_Networking_Game_Server/Game_Server.cpp.o -c /Users/luke/Documents/GitHub/SDL-Networking/SDL3-Networking-main/SDL3_Networking_Game_Server/Game_Server.cpp
 
 CMakeFiles/Server.dir/SDL3_Networking_Game_Server/Game_Server.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Server.dir/SDL3_Networking_Game_Server/Game_Server.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/luke/Documents/GitHub/SDL-Networking/SDL3-Networking-main/SDL3_Networking_Game_Server/Game_Server.cpp > CMakeFiles/Server.dir/SDL3_Networking_Game_Server/Game_Server.cpp.i
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/luke/Documents/GitHub/SDL-Networking/SDL3-Networking-main/SDL3_Networking_Game_Server/Game_Server.cpp > CMakeFiles/Server.dir/SDL3_Networking_Game_Server/Game_Server.cpp.i
 
 CMakeFiles/Server.dir/SDL3_Networking_Game_Server/Game_Server.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Server.dir/SDL3_Networking_Game_Server/Game_Server.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/luke/Documents/GitHub/SDL-Networking/SDL3-Networking-main/SDL3_Networking_Game_Server/Game_Server.cpp -o CMakeFiles/Server.dir/SDL3_Networking_Game_Server/Game_Server.cpp.s
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/luke/Documents/GitHub/SDL-Networking/SDL3-Networking-main/SDL3_Networking_Game_Server/Game_Server.cpp -o CMakeFiles/Server.dir/SDL3_Networking_Game_Server/Game_Server.cpp.s
 
 # Object files for target Server
 Server_OBJECTS = \

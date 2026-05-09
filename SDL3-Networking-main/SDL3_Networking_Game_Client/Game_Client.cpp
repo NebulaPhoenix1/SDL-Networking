@@ -20,6 +20,7 @@ struct Client {
     float x, y;
     Uint64 lastSeenTime;
     float angle;
+    int health;
 };
 
 const Uint64 DisconnectTimeoutMS = 5000; // 5 seconds
@@ -66,6 +67,10 @@ int main(int argc, char** argv) {
     bool running = true;
     std::cout << "Client started\n";
 
+    //Bullet list
+    std::vector<BulletData> renderBullets;
+
+
     while (running)
     {
         SDL_Event e;
@@ -91,19 +96,20 @@ int main(int argc, char** argv) {
                 }
             }
             float mouseX, mouseY;
-            SDL_GetMouseState(&mouseX, &mouseY);
+            Uint32 mouseState = SDL_GetMouseState(&mouseX, &mouseY);
+            bool isShooting = (mouseState & SDL_BUTTON_LMASK) != 0;
             //Calculate direction vector to mouse
             float dXMouse = mouseX - myX;
             float dYMouse = mouseY - myY;
             angle = std::atan2(dYMouse, dXMouse);
             float distance = std::sqrt(dXMouse * dXMouse + dYMouse * dYMouse);
-            //Move towards mouse if we are further than a small deadzone
-            if(distance > 5.0f)
+            //Move towards mouse if we are further than a small deadzone and W is pressed
+            if(distance > 5.0f && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_W])
             {
                 dx = dXMouse /distance;
                 dy = dYMouse /distance;
             }
-            InputPacket input = { PACKET_INPUT, myID, dx, dy, angle };
+            InputPacket input = { PACKET_INPUT, myID, dx, dy, angle, isShooting };
             NET_SendDatagram(udpSocket, serverAddress, udpServerPort, &input, sizeof(input));
         }
         //Receive UDP States
@@ -124,6 +130,7 @@ int main(int argc, char** argv) {
                         c.y = state->y;
                         c.lastSeenTime = currentTime;
                         c.angle = state->angle;
+                        c.health = state->health;
                         found = true;
                         break;
                     }
@@ -131,10 +138,21 @@ int main(int argc, char** argv) {
                 //New player, add to clients list
                 if (!found)
                 {
-					clients.push_back({ state->id, state->x, state->y, currentTime, state->angle });
+					clients.push_back({ state->id, state->x, state->y, currentTime, state->angle, state->health });
                 }
             }
-			NET_DestroyDatagram(dgram);
+            else if (type == PACKET_BULLETS)
+            {
+                BulletPacket* bp = (BulletPacket*)dgram->buf;
+                renderBullets.clear();
+                int count = bp->count;
+                if(count < 0 || count > 64) count = 0;
+                for (int i = 0; i < bp->count; ++i)
+                {
+                    renderBullets.push_back(bp->bullets[i]);
+                }
+            }
+            NET_DestroyDatagram(dgram);
             dgram = nullptr;
         }
         //Handle disconnects (timeouts)
@@ -182,6 +200,17 @@ int main(int argc, char** argv) {
             vertices[2].color = fcolor;
             vertices[2].tex_coord = {0.0f, 0.0f};
             SDL_RenderGeometry(renderer, NULL, vertices, 3, NULL, 0);
+            //Display Health offcenter from player 
+            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+            SDL_RenderDebugTextFormat(renderer, c.x - 15, c.y - 15, "Health: %d", (int)c.health); 
+        }
+        //Draw bullets as yellow squares        
+        SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255); 
+        for (const auto& b : renderBullets)
+        {
+            //X, Y, Width, Height
+            SDL_FRect rect = { b.x - 3.0f, b.y - 3.0f, 6.0f, 6.0f };
+            SDL_RenderFillRect(renderer, &rect);
         }
 		SDL_RenderPresent(renderer);
 		SDL_Delay(16); // ~60 FPS

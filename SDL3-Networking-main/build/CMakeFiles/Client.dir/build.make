@@ -76,15 +76,15 @@ CMakeFiles/Client.dir/SDL3_Networking_Game_Client/Game_Client.cpp.o: CMakeFiles/
 CMakeFiles/Client.dir/SDL3_Networking_Game_Client/Game_Client.cpp.o: /Users/luke/Documents/GitHub/SDL-Networking/SDL3-Networking-main/SDL3_Networking_Game_Client/Game_Client.cpp
 CMakeFiles/Client.dir/SDL3_Networking_Game_Client/Game_Client.cpp.o: CMakeFiles/Client.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/luke/Documents/GitHub/SDL-Networking/SDL3-Networking-main/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/Client.dir/SDL3_Networking_Game_Client/Game_Client.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Client.dir/SDL3_Networking_Game_Client/Game_Client.cpp.o -MF CMakeFiles/Client.dir/SDL3_Networking_Game_Client/Game_Client.cpp.o.d -o CMakeFiles/Client.dir/SDL3_Networking_Game_Client/Game_Client.cpp.o -c /Users/luke/Documents/GitHub/SDL-Networking/SDL3-Networking-main/SDL3_Networking_Game_Client/Game_Client.cpp
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Client.dir/SDL3_Networking_Game_Client/Game_Client.cpp.o -MF CMakeFiles/Client.dir/SDL3_Networking_Game_Client/Game_Client.cpp.o.d -o CMakeFiles/Client.dir/SDL3_Networking_Game_Client/Game_Client.cpp.o -c /Users/luke/Documents/GitHub/SDL-Networking/SDL3-Networking-main/SDL3_Networking_Game_Client/Game_Client.cpp
 
 CMakeFiles/Client.dir/SDL3_Networking_Game_Client/Game_Client.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Client.dir/SDL3_Networking_Game_Client/Game_Client.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/luke/Documents/GitHub/SDL-Networking/SDL3-Networking-main/SDL3_Networking_Game_Client/Game_Client.cpp > CMakeFiles/Client.dir/SDL3_Networking_Game_Client/Game_Client.cpp.i
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/luke/Documents/GitHub/SDL-Networking/SDL3-Networking-main/SDL3_Networking_Game_Client/Game_Client.cpp > CMakeFiles/Client.dir/SDL3_Networking_Game_Client/Game_Client.cpp.i
 
 CMakeFiles/Client.dir/SDL3_Networking_Game_Client/Game_Client.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Client.dir/SDL3_Networking_Game_Client/Game_Client.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/luke/Documents/GitHub/SDL-Networking/SDL3-Networking-main/SDL3_Networking_Game_Client/Game_Client.cpp -o CMakeFiles/Client.dir/SDL3_Networking_Game_Client/Game_Client.cpp.s
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/luke/Documents/GitHub/SDL-Networking/SDL3-Networking-main/SDL3_Networking_Game_Client/Game_Client.cpp -o CMakeFiles/Client.dir/SDL3_Networking_Game_Client/Game_Client.cpp.s
 
 # Object files for target Client
 Client_OBJECTS = \

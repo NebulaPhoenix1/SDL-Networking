@@ -1,1 +1,1 @@
-/usr/bin/c++  -arch arm64 -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/Client.dir/SDL3_Networking_Game_Client/Game_Client.cpp.o -o Client  -Wl,-rpath,/usr/local/lib -Wl,-rpath,/opt/homebrew/lib /opt/homebrew/lib/libSDL3.0.dylib -lSDL3_net
+/usr/bin/clang++ -g -arch arm64 -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/Client.dir/SDL3_Networking_Game_Client/Game_Client.cpp.o -o Client  -Wl,-rpath,/usr/local/lib -Wl,-rpath,/opt/homebrew/lib /opt/homebrew/lib/libSDL3.0.dylib -lSDL3_net
