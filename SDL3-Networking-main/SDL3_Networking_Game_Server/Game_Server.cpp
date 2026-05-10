@@ -208,6 +208,19 @@ int main(int argc, char** argv) {
             if(destroyed) b = bullets.erase(b);
             else ++b;
         }
+        //Respawn Detection
+        for(auto& client: clients)
+        {
+            //If alive, skip this client
+            if(client.health > 0) continue;
+            //Otherwise, reset their health and randomise their position
+            //Clients will not respawn near edges of screen 
+            client.health = 3;
+            float respawnX = 50.0f + std::rand() % 700;
+            float respawnY = 50.0f + std::rand() % 500;
+            client.x = respawnX;
+            client.y = respawnY;
+        }
         //Pickup Spawning
         if(pickups.size() < maxPickups && currentTime - lastPickupTime > pickupCooldownMS)
         {
