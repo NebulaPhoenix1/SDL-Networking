@@ -69,6 +69,9 @@ int main(int argc, char** argv) {
 
     //Bullet list
     std::vector<BulletData> renderBullets;
+    //Pickup list
+    std::vector<PickupData> renderPickups;
+
 
 
     while (running)
@@ -152,6 +155,17 @@ int main(int argc, char** argv) {
                     renderBullets.push_back(bp->bullets[i]);
                 }
             }
+            else if(type == PACKET_PICKUPS)
+            {
+                PickupPacket* pickupPacket = (PickupPacket*)dgram->buf;
+                renderPickups.clear();
+                int count = pickupPacket->count;
+                if(count < 0 || count > 3) count = 0;
+                for(int i = 0; i < pickupPacket->count; ++i)
+                {
+                    renderPickups.push_back(pickupPacket->pickups[i]);
+                }
+            }
             NET_DestroyDatagram(dgram);
             dgram = nullptr;
         }
@@ -210,6 +224,13 @@ int main(int argc, char** argv) {
         {
             //X, Y, Width, Height
             SDL_FRect rect = { b.x - 3.0f, b.y - 3.0f, 6.0f, 6.0f };
+            SDL_RenderFillRect(renderer, &rect);
+        }
+        //Draw pickups as green squares
+        SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+        for (const auto& p : renderPickups)
+        {
+            SDL_FRect rect = { p.x - 5.0f, p.y - 5.0f, 10.0f, 10.0f };
             SDL_RenderFillRect(renderer, &rect);
         }
 		SDL_RenderPresent(renderer);

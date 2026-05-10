@@ -1,5 +1,6 @@
 ﻿#include <SDL3/SDL.h>
 #include <SDL3/SDL.h>
+#include <cstdlib> //Inlcuded for random number generation
 
 //Check if we are compiling on a Mac
 #ifdef __APPLE__
@@ -32,6 +33,11 @@ struct Bullet
     float dx, dy;
     int ownerID;
     Uint64 spawnTime;
+};
+
+struct Pickup
+{
+    float x,y;
 };
 
 struct ThreadData
@@ -104,6 +110,13 @@ int main(int argc, char** argv) {
     std::vector<Bullet> bullets;
     const Uint64 shootCooldownMS = 300;
     const float bulletSpeed = 10.0f;
+
+    //Pickup Inits
+    std::srand(SDL_GetTicks());
+    std::vector<Pickup> pickups;
+    Uint64 lastPickupTime = SDL_GetTicks();
+    const int maxPickups = 3;
+    const Uint64 pickupCooldownMS = 5000; //Cooldown between pickup spawns
 
     while (true) {
 
@@ -195,8 +208,34 @@ int main(int argc, char** argv) {
             if(destroyed) b = bullets.erase(b);
             else ++b;
         }
-        
-
+        //Pickup Spawning
+        if(pickups.size() < maxPickups && currentTime - lastPickupTime > pickupCooldownMS)
+        {
+            lastPickupTime = currentTime;
+            //Generate random coordinates but keeping away from edges of screen
+            //Screen size is 800x600
+            float spawnX = 50.0f + std::rand() % 700;
+            float spawnY = 50.0f + std::rand() % 500;
+            pickups.push_back({spawnX, spawnY});
+        }
+        //Pickup Collision
+        for(auto p = pickups.begin(); p != pickups.end();)
+        {
+            bool collected = false;
+            for(auto& client: clients)
+            {
+                if(client.health <= 0) continue; //Dead players can't heal
+                float distance = std::sqrt(client.x - p->x) * (client.x - p->x) + (client.y - p->y) * (client.y - p->y);
+                if(distance < 20.0f) //15 is player size, 5 is pickup size
+                {
+                    client.health += 1;
+                    collected = true;
+                    break;
+                }
+            }
+            if(collected) p = pickups.erase(p);
+            else ++p;
+        }
         for (auto& reciever : clients)
         {
             if (!reciever.udpAddress) continue;
@@ -219,6 +258,14 @@ int main(int argc, char** argv) {
                 bp.bullets[bp.count++] = {b.x, b.y};
             }
             NET_SendDatagram(udpSocket, reciever.udpAddress, reciever.udpPort, &bp, sizeof(bp));
+            //Send pickup data pakcet
+            PickupPacket pickupPacket = {PACKET_PICKUPS, 0};
+            for(const auto& p: pickups)
+            {
+                if(pickupPacket.count >= maxPickups) break;
+                pickupPacket.pickups[pickupPacket.count++] = {p.x, p.y};
+            }
+            NET_SendDatagram(udpSocket, reciever.udpAddress, reciever.udpPort, &pickupPacket, sizeof(pickupPacket));
         }
         SDL_UnlockMutex(clientMutex);
         NET_DestroyDatagram(dgram);

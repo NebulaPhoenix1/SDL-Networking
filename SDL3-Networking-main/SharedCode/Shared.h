@@ -6,7 +6,8 @@ const int MAX_PLAYERS = 32;
 enum PacketType{
     PACKET_INPUT,
     PACKET_STATE,
-    PACKET_BULLETS //Packet for sending bullet positions
+    PACKET_BULLETS, //Packet for sending bullet positions
+    PACKET_PICKUPS
 };
 
 struct InputPacket {
@@ -15,6 +16,14 @@ struct InputPacket {
     float dx, dy;
     float angle;
     bool shooting; //Is the player holding the shoot button
+};
+
+struct StatePacket {
+    PacketType type;
+    int id;
+    float x, y;
+    float angle;
+    int health;
 };
 
 struct BulletData
@@ -29,10 +38,16 @@ struct BulletPacket
     BulletData bullets[64]; //Limit no of bullets to 64 to manage size of UDP packet :)
 };
 
-struct StatePacket {
-    PacketType type;
-    int id;
+struct PickupData
+{
     float x, y;
-    float angle;
-    int health;
 };
+
+struct PickupPacket
+{
+    PacketType type;
+    int count;
+    PickupData pickups[3]; //Limit no of health pickups to 3
+};
+
+
