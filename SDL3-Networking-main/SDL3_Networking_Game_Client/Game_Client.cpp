@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    SDL_Window* window = SDL_CreateWindow("Client", 800, 600, 0);
+    SDL_Window* window = SDL_CreateWindow("Client", WINDOW_X, WINDOW_Y, 0);
     SDL_Renderer* renderer = SDL_CreateRenderer(window, NULL);
     NET_Address* serverAddress = NET_ResolveHostname("127.0.0.1");
     NET_WaitUntilResolved(serverAddress, 2000);
@@ -223,14 +223,14 @@ int main(int argc, char** argv) {
         for (const auto& b : renderBullets)
         {
             //X, Y, Width, Height
-            SDL_FRect rect = { b.x - 3.0f, b.y - 3.0f, 6.0f, 6.0f };
+            SDL_FRect rect = { b.x - 3.0f, b.y - 3.0f, BULLET_SIZE, BULLET_SIZE };
             SDL_RenderFillRect(renderer, &rect);
         }
         //Draw pickups as green squares
         SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
         for (const auto& p : renderPickups)
         {
-            SDL_FRect rect = { p.x - 5.0f, p.y - 5.0f, 10.0f, 10.0f };
+            SDL_FRect rect = { p.x - 5.0f, p.y - 5.0f, PICKUP_SIZE, PICKUP_SIZE };
             SDL_RenderFillRect(renderer, &rect);
         }
 		SDL_RenderPresent(renderer);

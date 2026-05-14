@@ -14,6 +14,7 @@
 #include <cstring>
 #include "../SharedCode/Shared.h"
 
+
 //Using UDP for gameplay, TCP for joining and disconnecting
 
 struct Client {
@@ -197,7 +198,7 @@ int main(int argc, char** argv) {
                     if(client.id == b->ownerID || client.health <= 0) continue;
                     //Pythagoras for collision check
                     float distance = std::sqrt((client.x - b->x) * (client.x - b->x) + (client.y - b->y) * (client.y - b->y));
-                    if(distance < 15.0f) //15 is player size
+                    if(distance < PLAYER_SIZE) 
                     {
                         client.health -= 1;
                         destroyed = true;
@@ -238,8 +239,8 @@ int main(int argc, char** argv) {
             for(auto& client: clients)
             {
                 if(client.health <= 0) continue; //Dead players can't heal
-                float distance = std::sqrt(client.x - p->x) * (client.x - p->x) + (client.y - p->y) * (client.y - p->y);
-                if(distance < 20.0f) //15 is player size, 5 is pickup size
+                float distance = std::sqrt((client.x - p->x) * (client.x - p->x) + (client.y - p->y) * (client.y - p->y));
+                if(distance < PLAYER_SIZE+PICKUP_SIZE) //15 is player size, 5 is pickup size
                 {
                     client.health += 1;
                     collected = true;

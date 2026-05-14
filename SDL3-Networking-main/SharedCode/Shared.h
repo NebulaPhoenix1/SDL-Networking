@@ -1,6 +1,11 @@
 #pragma once
 
 const int MAX_PLAYERS = 32;
+const int PLAYER_SIZE = 15;
+const int PICKUP_SIZE = 5;
+const int BULLET_SIZE = 6;
+const int WINDOW_X= 800;
+const int WINDOW_Y = 600;
 
 //Join, Assign ID, and Disconnect packets removed as they are using TCP and not UDP
 enum PacketType{
