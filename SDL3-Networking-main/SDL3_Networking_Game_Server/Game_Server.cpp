@@ -14,9 +14,7 @@
 #include <cstring>
 #include "../SharedCode/Shared.h"
 
-
 //Using UDP for gameplay, TCP for joining and disconnecting
-
 struct Client {
     int id;
     NET_StreamSocket* tcpSocket;
